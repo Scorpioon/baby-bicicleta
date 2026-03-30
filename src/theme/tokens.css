@@ -1,0 +1,24 @@
+:root {
+  /* 60 / 30 / 10 Logic */
+  --color-surface-base: #FFFFFF;     /* 60 */
+  --color-surface-soft: #F5F5F5;     /* 30 */
+  --color-accent: #E2001D;           /* 10 */
+  
+  --color-text-main: #1A1A1A;
+  --color-text-muted: #666666;
+  --color-border: #E6E6E6;
+
+  /* Trust States */
+  --color-trust-green: #10B981;
+  --color-trust-green-soft: #D1FAE5;
+  --color-trust-yellow: #F59E0B;
+  --color-trust-red: #EF4444;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-sheet: 24px;
+  
+  --shadow-sheet: 0 -4px 20px rgba(0,0,0,0.1);
+  --shadow-card: 0 2px 8px rgba(0,0,0,0.05);
+}
