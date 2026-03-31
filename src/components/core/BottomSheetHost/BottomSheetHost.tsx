@@ -4,6 +4,7 @@ import { useUIStore } from '../../../store/useUIStore';
 import { StationSheetStub } from '../../../features/station/StationSheetStub/StationSheetStub';
 import { IncidentComposerStub } from '../../../features/incident/IncidentComposerStub/IncidentComposerStub';
 import { IncidentSubmittedState } from '../../../features/incident/IncidentSubmittedState/IncidentSubmittedState';
+import { ReservationSheet } from '../../../features/reservation/ReservationSheet/ReservationSheet';
 
 export const BottomSheetHost = () => {
   const { sheetState, setSheetHeight } = useUIStore();
@@ -39,6 +40,7 @@ export const BottomSheetHost = () => {
       <div style={{ padding: '0 20px 24px', position: 'relative', overflow: 'hidden' }}>
         <AnimatePresence mode="wait">
           {sheetState === 'SHEET_STATION_VIEW' && <StationSheetStub key="station" />}
+          {sheetState === 'SHEET_RESERVATION' && <ReservationSheet key="reservation" />}
           {sheetState === 'SHEET_INCIDENT_COMPOSER' && <IncidentComposerStub key="composer" />}
           {sheetState === 'SHEET_INCIDENT_SUBMITTED' && <IncidentSubmittedState key="submitted" />}
         </AnimatePresence>

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-export type SheetState = 'SHEET_CLOSED' | 'SHEET_STATION_VIEW' | 'SHEET_INCIDENT_COMPOSER' | 'SHEET_INCIDENT_SUBMITTED';
+export type SheetState = 'SHEET_CLOSED' | 'SHEET_STATION_VIEW' | 'SHEET_INCIDENT_COMPOSER' | 'SHEET_INCIDENT_SUBMITTED' | 'SHEET_RESERVATION';
 
 interface UIState {
   sheetState: SheetState;
