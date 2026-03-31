@@ -2,9 +2,11 @@ import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useUIStore } from '../../../store/useUIStore';
 import { StationSheetStub } from '../../../features/station/StationSheetStub/StationSheetStub';
+import { StationInspectionStub } from '../../../features/station/StationInspectionStub/StationInspectionStub';
+import { ReservationLiveMode } from '../../../features/reservation/ReservationLiveMode/ReservationLiveMode';
+import { PickupModeStub } from '../../../features/pickup/PickupModeStub/PickupModeStub';
 import { IncidentComposerStub } from '../../../features/incident/IncidentComposerStub/IncidentComposerStub';
 import { IncidentSubmittedState } from '../../../features/incident/IncidentSubmittedState/IncidentSubmittedState';
-import { ReservationSheet } from '../../../features/reservation/ReservationSheet/ReservationSheet';
 
 export const BottomSheetHost = () => {
   const { sheetState, setSheetHeight } = useUIStore();
@@ -16,6 +18,16 @@ export const BottomSheetHost = () => {
     } else if (containerRef.current) {
       setSheetHeight(containerRef.current.offsetHeight);
     }
+  }, [sheetState, setSheetHeight]);
+
+  // Use ResizeObserver for dynamic height changes inside live modes
+  useEffect(() => {
+    if (!containerRef.current || sheetState === 'SHEET_CLOSED') return;
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) setSheetHeight(entry.target.getBoundingClientRect().height);
+    });
+    observer.observe(containerRef.current);
+    return () => observer.disconnect();
   }, [sheetState, setSheetHeight]);
 
   if (sheetState === 'SHEET_CLOSED') return null;
@@ -40,7 +52,9 @@ export const BottomSheetHost = () => {
       <div style={{ padding: '0 20px 24px', position: 'relative', overflow: 'hidden' }}>
         <AnimatePresence mode="wait">
           {sheetState === 'SHEET_STATION_VIEW' && <StationSheetStub key="station" />}
-          {sheetState === 'SHEET_RESERVATION' && <ReservationSheet key="reservation" />}
+          {sheetState === 'SHEET_STATION_INSPECT' && <StationInspectionStub key="inspect" />}
+          {sheetState === 'SHEET_RESERVATION_LIVE' && <ReservationLiveMode key="live" />}
+          {sheetState === 'SHEET_PICKUP_MODE' && <PickupModeStub key="pickup" />}
           {sheetState === 'SHEET_INCIDENT_COMPOSER' && <IncidentComposerStub key="composer" />}
           {sheetState === 'SHEET_INCIDENT_SUBMITTED' && <IncidentSubmittedState key="submitted" />}
         </AnimatePresence>
