@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 import Map, { Marker } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
-import maplibregl from 'maplibre-gl';
 import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
 import { mockStations } from '../../../data/mocks/stations';
@@ -24,10 +23,17 @@ export const MapView = () => {
     setSheetState('SHEET_CLOSED');
   };
 
+  const getMarkerColor = (st: typeof mockStations[0]) => {
+    if (st.status === 'BROKEN') return '#4D4D4D'; // Dark gray
+    if (st.mechanicalCount === 0 && st.electricCount === 0) return '#A3A3A3'; // Muted empty gray
+    if (st.electricCount > st.mechanicalCount) return '#3B82F6'; // Blue for electric-dominant
+    return 'var(--color-accent)'; // Red for mechanical-dominant
+  };
+
   return (
     <Map
       ref={mapRef}
-      initialViewState={{ longitude: 2.1750, latitude: 41.3880, zoom: 13 }}
+      initialViewState={{ longitude: 2.1750, latitude: 41.3880, zoom: 13.5 }}
       mapStyle={MAP_STYLE}
       style={{ width: '100%', height: '100%' }}
       padding={{ bottom: sheetHeightPx }}
@@ -35,19 +41,29 @@ export const MapView = () => {
     >
       {mockStations.map(st => {
         const isSelected = st.id === selectedStationId;
+        const color = getMarkerColor(st);
+        
         return (
           <Marker key={st.id} longitude={st.lng} latitude={st.lat} onClick={(e: any) => handleMarkerClick(e, st.id)}>
             <div style={{
-              width: isSelected ? 32 : 24, 
-              height: isSelected ? 32 : 24, 
-              backgroundColor: isSelected ? 'var(--color-text-main)' : 'var(--color-accent)',
+              width: 24, 
+              height: 24, 
+              backgroundColor: color,
               borderRadius: '50%', 
-              border: isSelected ? '4px solid white' : '3px solid white', 
+              border: '2px solid white', 
               cursor: 'pointer',
-              boxShadow: isSelected ? '0 4px 12px rgba(0,0,0,0.4)' : '0 2px 4px rgba(0,0,0,0.3)',
+              boxShadow: isSelected ? '0 0 0 2px white, 0 0 0 5px var(--color-text-main)' : '0 2px 5px rgba(0,0,0,0.2)',
               transition: 'all 0.2s cubic-bezier(0.2, 0, 0, 1)',
-              transform: isSelected ? 'scale(1.1)' : 'scale(1)'
-            }} />
+              transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white',
+              fontSize: 14,
+              fontWeight: 'bold'
+            }}>
+              {st.status === 'BROKEN' && '!'}
+            </div>
           </Marker>
         );
       })}

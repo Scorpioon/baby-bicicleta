@@ -10,7 +10,8 @@ export const Chip: React.FC<{ label: string, trustLevel: 'HIGH' | 'MEDIUM' | 'LO
   return (
     <div style={{
       display: 'inline-flex', alignItems: 'center', padding: '4px 8px',
-      borderRadius: '16px', fontSize: '12px', fontWeight: 600,
+      borderRadius: '6px', fontSize: '11px', fontWeight: 800,
+      letterSpacing: '0.03em', textTransform: 'uppercase',
       backgroundColor: colors[trustLevel].bg, color: colors[trustLevel].color
     }}>
       {label}
