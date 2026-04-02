@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import Map, { Marker } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
+import { AlertTriangle } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
 import { mockStations } from '../../../data/mocks/stations';
@@ -23,11 +24,11 @@ export const MapView = () => {
     setSheetState('SHEET_CLOSED');
   };
 
-  const getMarkerColor = (st: typeof mockStations[0]) => {
-    if (st.status === 'BROKEN') return '#4D4D4D'; // Dark gray
-    if (st.mechanicalCount === 0 && st.electricCount === 0) return '#A3A3A3'; // Muted empty gray
-    if (st.electricCount > st.mechanicalCount) return '#3B82F6'; // Blue for electric-dominant
-    return 'var(--color-accent)'; // Red for mechanical-dominant
+  const getMarkerBgColor = (st: typeof mockStations[0]) => {
+    if (st.status === 'BROKEN') return '#FDA4AF'; // Salmon/Pink
+    if (st.mechanicalCount === 0 && st.electricCount === 0) return '#A3A3A3'; 
+    if (st.electricCount > st.mechanicalCount) return '#3B82F6'; 
+    return 'var(--color-accent)'; 
   };
 
   return (
@@ -41,28 +42,21 @@ export const MapView = () => {
     >
       {mockStations.map(st => {
         const isSelected = st.id === selectedStationId;
-        const color = getMarkerColor(st);
+        const isBroken = st.status === 'BROKEN';
+        const bgColor = getMarkerBgColor(st);
+        const borderColor = isBroken ? '#E11D48' : 'white';
         
         return (
           <Marker key={st.id} longitude={st.lng} latitude={st.lat} onClick={(e: any) => handleMarkerClick(e, st.id)}>
             <div style={{
-              width: 24, 
-              height: 24, 
-              backgroundColor: color,
-              borderRadius: '50%', 
-              border: '2px solid white', 
-              cursor: 'pointer',
+              width: 24, height: 24, backgroundColor: bgColor, borderRadius: '50%', 
+              border: `2px solid ${borderColor}`, cursor: 'pointer',
               boxShadow: isSelected ? '0 0 0 2px white, 0 0 0 5px var(--color-text-main)' : '0 2px 5px rgba(0,0,0,0.2)',
               transition: 'all 0.2s cubic-bezier(0.2, 0, 0, 1)',
               transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontSize: 14,
-              fontWeight: 'bold'
+              display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
-              {st.status === 'BROKEN' && '!'}
+              {isBroken && <AlertTriangle size={14} color="#BE123C" strokeWidth={3} />}
             </div>
           </Marker>
         );

@@ -1,10 +1,23 @@
 import { motion } from 'framer-motion';
-import { Cog, Zap, ArrowDownToLine, ChevronRight, Heart, Footprints, CornerUpRight, AlertTriangle } from 'lucide-react';
+import { Cog, Zap, ArrowDownToLine, ChevronRight, Heart, CornerUpRight } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
 import { mockStations } from '../../../data/mocks/stations';
 import { Button } from '../../../components/ui/Button/Button';
 import { Chip } from '../../../components/ui/Chip/Chip';
+
+// Custom lightweight SVG for "Person Walking"
+interface WalkIconProps { size?: number | string; color?: string; }
+const WalkIcon = ({ size = 14, color = 'currentColor' }: WalkIconProps) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="4" r="2"></circle>
+    <path d="M12 7l-2 4 2 5"></path>
+    <path d="M10 11l-3-2"></path>
+    <path d="M12 7l4 2-1 4"></path>
+    <path d="M12 16l-2 5"></path>
+    <path d="M12 16l3 5"></path>
+  </svg>
+);
 
 export const StationSheetStub = () => {
   const { selectedStationId, selectStation, startReservation, setReservationStatus } = useCoreStore();
@@ -25,17 +38,19 @@ export const StationSheetStub = () => {
     }, 1500);
   };
 
-  const fallbackStation = station.fallbackStationId ? mockStations.find(s => s.id === station.fallbackStationId) : null;
-
-  const handleFallback = () => {
-    if (fallbackStation) {
-      selectStation(fallbackStation.id);
-    }
+  const handleFallback = (id: string) => {
+    selectStation(id);
   };
 
   const isHealthy = station.confidenceState === 'HIGH';
   const isBroken = station.status === 'BROKEN';
   const isEmpty = station.mechanicalCount === 0 && station.electricCount === 0;
+
+  const fallbackStations = station.fallbackStationIds 
+    ? station.fallbackStationIds.map(id => mockStations.find(s => s.id === id)).filter(Boolean) 
+    : [];
+
+  const formatId = (idStr: string) => String(idStr).padStart(4, '0');
 
   return (
     <motion.div 
@@ -45,31 +60,28 @@ export const StationSheetStub = () => {
     >
       {/* HEADER SECTION */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: isHealthy && !isBroken ? 20 : 0 }}>
-        <button style={{ background: 'none', border: 'none', padding: '2px 0 0 0', cursor: 'pointer', flexShrink: 0 }}>
-          <Heart size={24} color={station.isFavorite ? 'var(--color-accent)' : 'var(--color-text-muted)'} fill={station.isFavorite ? 'var(--color-accent)' : 'none'} />
-        </button>
-        
         <div style={{ flexGrow: 1, marginTop: -2 }}>
           <h1 id="station_header" style={{ fontSize: 18, fontWeight: 800, marginBottom: 4, letterSpacing: '-0.02em', lineHeight: 1.2, color: 'var(--color-text-main)' }}>
-            Bicing #{station.stationNumber} - {station.streetName}
+            Bicing #{formatId(station.stationNumber)} - {station.streetName}
           </h1>
           <div id="station_distance_hint" style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--color-text-muted)', fontSize: 14 }}>
-            <Footprints size={14} /><span>a {station.distanceMinutes} min andando</span>
+            <WalkIcon size={14} /><span>a {station.distanceMinutes} min andando</span>
           </div>
         </div>
 
-        <button style={{ backgroundColor: 'var(--color-surface-soft)', border: '1px solid var(--color-border)', borderRadius: '50%', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
-          <CornerUpRight size={20} color="var(--color-text-main)" />
-        </button>
+        <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          <button style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <Heart size={20} color={station.isFavorite ? 'var(--color-accent)' : 'var(--color-text-muted)'} fill={station.isFavorite ? 'var(--color-accent)' : 'none'} />
+          </button>
+          <button style={{ backgroundColor: 'var(--color-surface-soft)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <CornerUpRight size={20} color="var(--color-text-main)" />
+          </button>
+        </div>
       </div>
 
       {/* CONDITIONAL WARNING STRIP */}
       {(!isHealthy || isBroken) && (
-        <div style={{ 
-          display: 'flex', alignItems: 'center', gap: 12, 
-          padding: '12px 0', margin: '16px 0',
-          borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' 
-        }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 0', margin: '16px 0', borderTop: '1px solid var(--color-border)', borderBottom: '1px solid var(--color-border)' }}>
           <span id="station_confidence_chip" style={{ flexShrink: 0 }}>
             <Chip label={station.confidenceLabel} trustLevel={station.confidenceState as 'MEDIUM'|'LOW'} />
           </span>
@@ -79,21 +91,34 @@ export const StationSheetStub = () => {
         </div>
       )}
 
-      {/* BROKEN FALLBACK ANTI-ANXIETY */}
-      {isBroken && fallbackStation && (
-        <div style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA', borderRadius: 'var(--radius-md)', padding: '12px 16px', marginBottom: 20 }}>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-            <AlertTriangle size={18} color="var(--color-trust-red)" style={{ flexShrink: 0, marginTop: 2 }} />
-            <div style={{ flexGrow: 1 }}>
-              <h4 style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-trust-red)', marginBottom: 4 }}>Estación inoperativa</h4>
-              <p style={{ fontSize: 13, color: 'var(--color-trust-red)', opacity: 0.9, marginBottom: 12, lineHeight: 1.4 }}>
-                Alternativa: <strong>{fallbackStation.name}</strong><br />
-                {fallbackStation.mechanicalCount + fallbackStation.electricCount} bicis · {fallbackStation.dockCount} anclajes · a {fallbackStation.distanceMinutes} min.
-              </p>
-              <Button variant="secondary" style={{ padding: '8px 16px', fontSize: 13, backgroundColor: 'white' }} onClick={handleFallback}>
-                Ir
-              </Button>
-            </div>
+      {/* MULTI-ROW FALLBACK (Unified List Container) */}
+      {isBroken && fallbackStations.length > 0 && (
+        <div style={{ marginBottom: 20 }}>
+          <h4 style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-trust-red)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+            Alternativas operativas
+          </h4>
+          <div style={{ backgroundColor: '#FEF2F2', borderRadius: 'var(--radius-md)', border: '1px solid #FECACA', overflow: 'hidden' }}>
+            {fallbackStations.map((alt, i) => (
+              <div key={alt!.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: i < fallbackStations.length - 1 ? '1px solid #FECACA' : 'none' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-trust-red)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: 12 }}>
+                    #{formatId(alt!.stationNumber)} - {alt!.streetName}
+                  </span>
+                  <div style={{ fontSize: 13, color: 'var(--color-trust-red)', opacity: 0.9, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>{alt!.mechanicalCount + alt!.electricCount} bicis</span>
+                    <span style={{ opacity: 0.5 }}>·</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><WalkIcon size={12} /> {alt!.distanceMinutes} min</span>
+                  </div>
+                </div>
+                {/* Native button bypasses any generic Button.tsx merge collisions */}
+                <button 
+                  onClick={() => handleFallback(alt!.id)}
+                  style={{ backgroundColor: 'white', color: 'var(--color-trust-red)', border: '1px solid #FECACA', borderRadius: 'var(--radius-sm)', padding: '6px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
+                >
+                  Ir
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       )}
