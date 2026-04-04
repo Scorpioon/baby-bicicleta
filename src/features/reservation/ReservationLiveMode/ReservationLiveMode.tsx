@@ -1,3 +1,4 @@
+// BeBe v0.2.3 Pickup Minimum UI
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCoreStore } from '../../../store/useCoreStore';
@@ -29,6 +30,10 @@ export const ReservationLiveMode = () => {
   const handleCancel = () => {
     cancelReservation();
     setSheetState('SHEET_STATION_VIEW');
+  };
+
+  const handleTriggerPickup = () => {
+    setSheetState('SHEET_PICKUP_MODE');
   };
 
   return (
@@ -65,7 +70,7 @@ export const ReservationLiveMode = () => {
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 12 }}>
                 <Button variant="secondary" onClick={handleCancel}>Cancelar</Button>
-                <Button id="reserve_pickup_trigger" variant="primary" onClick={() => setSheetState('SHEET_PICKUP_MODE')}>Coger bici</Button>
+                <Button id="reserve_pickup_trigger" variant="primary" onClick={handleTriggerPickup}>Coger bici</Button>
               </div>
               
               <div style={{ textAlign: 'center', marginTop: 16 }}>
