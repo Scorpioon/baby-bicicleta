@@ -1,104 +1,180 @@
-// BeBe v0.2.4 Incident Minimum UI v1
-import React from 'react';
+﻿// BeBe v0.2.8 - Per-bike Trust UI Step 1 (Local Data)
 import { motion } from 'framer-motion';
-import { ArrowLeft, AlertTriangle, Clock, Cog, Zap, ArrowDownToLine } from 'lucide-react';
+import { ArrowLeft, Clock, Cog, Zap, ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
 import { mockStations } from '../../../data/mocks/stations';
 import { Button } from '../../../components/ui/Button/Button';
-import { Chip } from '../../../components/ui/Chip/Chip';
 
-// Explicit Prop Typing for ad-hoc components
-interface StatRowProps {
-  icon: React.ReactNode;
-  label: string;
-  value: number | string;
-  color?: string;
+/**
+ * LOCAL-ONLY TYPES (Step 1)
+ */
+interface LocalBikeStatus {
+  id: string;
+  type: 'MECHANICAL' | 'ELECTRIC';
+  battery?: number;
+  trustLevel: 'HIGH' | 'MEDIUM' | 'LOW';
+  trustLabel: string;
 }
 
-const StatRow = ({ icon, label, value, color = 'var(--color-text-main)' }: StatRowProps) => (
-  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--color-border)' }}>
-    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-      {icon}
-      <span style={{ fontSize: 15, fontWeight: 600, color: 'var(--color-text-muted)' }}>{label}</span>
+/**
+ * LOCAL MOCK DATA
+ * Scoped to this component to prevent global schema pollution.
+ */
+const getLocalBikes = (stationId: string): LocalBikeStatus[] => {
+  const data: Record<string, LocalBikeStatus[]> = {
+    'st_1': [
+      { id: 'B-102', type: 'MECHANICAL', trustLevel: 'HIGH', trustLabel: 'Excelente' },
+      { id: 'B-992', type: 'MECHANICAL', trustLevel: 'MEDIUM', trustLabel: 'Revisar frenos' },
+      { id: 'E-401', type: 'ELECTRIC', battery: 88, trustLevel: 'HIGH', trustLabel: 'Excelente' }
+    ],
+    'st_2': [
+      { id: 'E-112', type: 'ELECTRIC', battery: 12, trustLevel: 'LOW', trustLabel: 'BaterÃ­a baja' }
+    ],
+    'st_3': [
+      { id: 'B-001', type: 'MECHANICAL', trustLevel: 'HIGH', trustLabel: 'Ok' },
+      { id: 'B-005', type: 'MECHANICAL', trustLevel: 'LOW', trustLabel: 'Cadena suelta' }
+    ]
+  };
+  return data[stationId] || [];
+};
+
+const BikeRow = ({ bike }: { bike: LocalBikeStatus }) => {
+  const getTrustColor = () => {
+    switch (bike.trustLevel) {
+      case 'HIGH': return 'var(--color-trust-green)';
+      case 'MEDIUM': return 'var(--color-trust-yellow)';
+      case 'LOW': return 'var(--color-trust-red)';
+      default: return 'var(--color-text-muted)';
+    }
+  };
+  
+  const TrustIcon = bike.trustLevel === 'HIGH' ? ShieldCheck : (bike.trustLevel === 'MEDIUM' ? Shield : ShieldAlert);
+
+  return (
+    <div style={{ 
+      display: 'flex', 
+      alignItems: 'center', 
+      gap: 12, 
+      padding: '10px 0', 
+      borderBottom: '1px solid var(--color-border)' 
+    }}>
+      {bike.type === 'ELECTRIC' ? (
+        <Zap size={16} color="#3B82F6" />
+      ) : (
+        <Cog size={16} color="var(--color-text-muted)" />
+      )}
+      <div style={{ flexGrow: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 13, fontWeight: 700 }}>{bike.id}</span>
+          {bike.battery !== undefined && (
+            <span style={{ fontSize: 10, fontWeight: 800, color: '#3B82F6' }}>{bike.battery}%</span>
+          )}
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 1 }}>
+          <TrustIcon size={11} color={getTrustColor()} strokeWidth={3} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: getTrustColor() }}>{bike.trustLabel}</span>
+        </div>
+      </div>
     </div>
-    <span style={{ fontSize: 16, fontWeight: 800, color }}>{value}</span>
-  </div>
-);
+  );
+};
 
 export const StationInspectionStub = () => {
   const { selectedStationId } = useCoreStore();
-  const { setSheetState, setIncidentReturnState } = useUIStore();
+  const setSheetState = useUIStore(s => s.setSheetState);
   
   const station = mockStations.find(s => s.id === selectedStationId);
+  const bikes = selectedStationId ? getLocalBikes(selectedStationId) : [];
+
   if (!station) return null;
 
-  const formatId = (idStr: string) => String(idStr).padStart(4, '0');
-
-  const handleReport = () => {
-    setIncidentReturnState('SHEET_STATION_INSPECT');
-    setSheetState('SHEET_INCIDENT_COMPOSER');
-  };
-
   return (
-    <motion.div id="station_inspection_v1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}>
-      {/* Top Header / Back Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+    <motion.div 
+      id="station_inspection_v0_2_8" 
+      initial={{ opacity: 0, x: 10 }} 
+      animate={{ opacity: 1, x: 0 }} 
+      exit={{ opacity: 0, x: -10 }}
+      style={{ paddingBottom: 16 }}
+    >
+      {/* Header with Navigation */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <button 
           onClick={() => setSheetState('SHEET_STATION_VIEW')}
-          style={{ background: 'var(--color-surface-soft)', border: '1px solid var(--color-border)', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+          style={{ 
+            background: 'var(--color-surface-soft)', 
+            border: 'none', 
+            borderRadius: '50%', 
+            width: 32, 
+            height: 32, 
+            cursor: 'pointer', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center' 
+          }}
         >
-          <ArrowLeft size={18} color="var(--color-text-main)" />
+          <ArrowLeft size={18} />
         </button>
-        <h2 style={{ fontSize: 18, fontWeight: 800, color: 'var(--color-text-main)', margin: 0, letterSpacing: '-0.02em' }}>
-          Estado detallado
-        </h2>
-      </div>
-
-      {/* Identity */}
-      <div style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4, lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-          #{formatId(station.stationNumber)} - {station.streetName}
-        </h3>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: 'var(--color-text-muted)' }}>
-          <Clock size={13} />
-          <span>Actualizado {station.dataFreshnessLabel}</span>
+        <div>
+          <h2 style={{ fontSize: 16, fontWeight: 800 }}>{station.name}</h2>
+          <div style={{ fontSize: 11, color: 'var(--color-text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Clock size={11} /> Actualizado {station.dataFreshnessLabel}
+          </div>
         </div>
       </div>
 
-      {/* Trust & Confidence Module (Always visible in inspection) */}
-      <div style={{ backgroundColor: 'var(--color-surface-soft)', borderRadius: 'var(--radius-md)', padding: '16px', marginBottom: 24, border: '1px solid var(--color-border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-          <Chip label={station.confidenceLabel} trustLevel={station.confidenceState as 'HIGH'|'MEDIUM'|'LOW'} />
-        </div>
-        <p style={{ fontSize: 14, color: 'var(--color-text-main)', margin: 0, lineHeight: 1.4 }}>
+      {/* Station Context Summary */}
+      <div style={{ 
+        backgroundColor: 'var(--color-surface-soft)', 
+        padding: '12px 16px', 
+        borderRadius: 'var(--radius-md)', 
+        marginBottom: 20 
+      }}>
+        <span style={{ 
+          fontSize: 10, 
+          fontWeight: 900, 
+          color: 'var(--color-text-muted)', 
+          textTransform: 'uppercase', 
+          letterSpacing: '0.05em' 
+        }}>
+          Estado de confianza
+        </span>
+        <p style={{ fontSize: 13, marginTop: 4, fontWeight: 500, lineHeight: 1.4 }}>
           {station.confidenceCopy}
         </p>
       </div>
 
-      {/* Issue Hints Module */}
-      {station.issueHint && (
-        <div style={{ backgroundColor: '#FEF2F2', padding: '12px 16px', borderRadius: 'var(--radius-md)', marginBottom: 24, display: 'flex', gap: 12, alignItems: 'flex-start', border: '1px solid #FECACA' }}>
-          <AlertTriangle size={18} color="var(--color-trust-red)" style={{ flexShrink: 0, marginTop: 2 }} />
-          <div>
-            <span style={{ fontWeight: 700, fontSize: 13, color: 'var(--color-trust-red)', display: 'block', marginBottom: 2 }}>Incidencias detectadas</span>
-            <p style={{ fontSize: 13, color: 'var(--color-trust-red)', margin: 0, opacity: 0.9, lineHeight: 1.4 }}>{station.issueHint}</p>
-          </div>
-        </div>
-      )}
-
-      {/* Inventory Rollup */}
+      {/* Per-bike Detail List */}
       <div style={{ marginBottom: 24 }}>
-        <h4 style={{ fontSize: 12, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--color-text-muted)', marginBottom: 8 }}>Inventario en tiempo real</h4>
-        <StatRow icon={<Cog size={18} strokeWidth={2.5} color="var(--color-text-main)" />} label="Bicis mecánicas" value={station.mechanicalCount} />
-        <StatRow icon={<Zap size={18} strokeWidth={2.5} color="#3B82F6" />} label="Bicis eléctricas" value={station.electricCount} color="#3B82F6" />
-        <StatRow icon={<ArrowDownToLine size={18} strokeWidth={2.5} color="var(--color-text-main)" />} label="Anclajes libres" value={station.dockCount} />
+        <h4 style={{ 
+          fontSize: 11, 
+          fontWeight: 800, 
+          color: 'var(--color-text-muted)', 
+          textTransform: 'uppercase', 
+          marginBottom: 4, 
+          paddingLeft: 2 
+        }}>
+          Bicis en estaciÃ³n ({bikes.length})
+        </h4>
+        <div style={{ maxHeight: '240px', overflowY: 'auto', padding: '0 2px' }}>
+          {bikes.length > 0 ? (
+            bikes.map(bike => <BikeRow key={bike.id} bike={bike} />)
+          ) : (
+            <div style={{ padding: '16px 0', fontSize: 13, color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+              No hay detalles de bicis disponibles.
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Bottom Action */}
+      {/* Actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <Button fullWidth variant="secondary" onClick={handleReport}>
-          Reportar un problema
+        <Button 
+          fullWidth 
+          variant="secondary" 
+          onClick={() => setSheetState('SHEET_INCIDENT_COMPOSER')}
+        >
+          Reportar problema
         </Button>
       </div>
     </motion.div>
