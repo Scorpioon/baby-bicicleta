@@ -1,7 +1,7 @@
-﻿// BeBe v0.2.13 - Inspection Module v2 (Step 2: Container & Toggle)
+﻿// BeBe v0.2.14 - Inspection Module v2 (Step 3: Forecast-lite)
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, Cog, Zap, ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
+import { ArrowLeft, Clock, Cog, Zap, ShieldCheck, ShieldAlert, Shield, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
 import { mockStations } from '../../../data/mocks/stations';
@@ -18,8 +18,15 @@ interface LocalBikeStatus {
   trustLabel: string;
 }
 
+interface LocalForecastRow {
+  id: string;
+  timeframe: string;
+  trend: 'UP' | 'DOWN' | 'STABLE';
+  copy: string;
+}
+
 /**
- * LOCAL MOCK DATA (Expanded Density for Stress Testing)
+ * LOCAL MOCK DATA (Bikes)
  */
 const getLocalBikes = (stationId: string): LocalBikeStatus[] => {
   const data: Record<string, LocalBikeStatus[]> = {
@@ -48,6 +55,28 @@ const getLocalBikes = (stationId: string): LocalBikeStatus[] => {
     ]
   };
   return data[stationId] || [];
+};
+
+/**
+ * LOCAL MOCK DATA (Forecast)
+ */
+const getLocalForecast = (stationId: string): LocalForecastRow[] => {
+  const data: Record<string, LocalForecastRow[]> = {
+    'st_1': [
+      { id: 'f1', timeframe: 'Pr\u00f3ximos 15 min', trend: 'DOWN', copy: 'Alta demanda esperada. Es probable que las bicis se agoten r\u00e1pido.' },
+      { id: 'f2', timeframe: 'Pr\u00f3xima hora', trend: 'UP', copy: 'Se estiman algunas devoluciones de usuarios entrantes.' }
+    ],
+    'st_2': [
+      { id: 'f1', timeframe: 'Pr\u00f3ximos 30 min', trend: 'STABLE', copy: 'Baja actividad esperada. La situaci\u00f3n puede mantenerse cr\u00edtica.' }
+    ],
+    'st_3': [
+      { id: 'f1', timeframe: 'Pr\u00f3ximos 15 min', trend: 'UP', copy: 'Tendencia favorable. Devoluciones probables a corto plazo.' },
+      { id: 'f2', timeframe: 'Pr\u00f3xima hora', trend: 'STABLE', copy: 'Disponibilidad estimada estable durante la tarde.' }
+    ]
+  };
+  return data[stationId] || [
+    { id: 'def', timeframe: 'Corto plazo', trend: 'STABLE', copy: 'Disponibilidad sin cambios bruscos previstos en esta estaci\u00f3n.' }
+  ];
 };
 
 const BikeRow = ({ bike }: { bike: LocalBikeStatus }) => {
@@ -91,6 +120,27 @@ const BikeRow = ({ bike }: { bike: LocalBikeStatus }) => {
   );
 };
 
+const ForecastRow = ({ row }: { row: LocalForecastRow }) => {
+  const Icon = row.trend === 'UP' ? TrendingUp : (row.trend === 'DOWN' ? TrendingDown : Minus);
+  const iconColor = row.trend === 'UP' ? 'var(--color-trust-green)' : (row.trend === 'DOWN' ? 'var(--color-trust-yellow)' : 'var(--color-text-muted)');
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 0', borderBottom: '1px solid var(--color-border)' }}>
+      <div style={{ marginTop: 2 }}>
+        <Icon size={18} color={iconColor} strokeWidth={2.5} />
+      </div>
+      <div>
+        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-text-main)', marginBottom: 2 }}>
+          {row.timeframe}
+        </div>
+        <div style={{ fontSize: 12, color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+          {row.copy}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const StationInspectionStub = () => {
   const { selectedStationId } = useCoreStore();
   const setSheetState = useUIStore(s => s.setSheetState);
@@ -98,12 +148,13 @@ export const StationInspectionStub = () => {
   
   const station = mockStations.find(s => s.id === selectedStationId);
   const bikes = selectedStationId ? getLocalBikes(selectedStationId) : [];
+  const forecasts = selectedStationId ? getLocalForecast(selectedStationId) : [];
 
   if (!station) return null;
 
   return (
     <motion.div 
-      id="station_inspection_v0_2_13" 
+      id="station_inspection_v0_2_14" 
       initial={{ opacity: 0, x: 10 }} 
       animate={{ opacity: 1, x: 0 }} 
       exit={{ opacity: 0, x: -10 }}
@@ -229,21 +280,33 @@ export const StationInspectionStub = () => {
             )}
           </div>
         ) : (
-          <div style={{ 
-            height: '160px', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            border: '1px dashed var(--color-border)', 
-            borderRadius: 'var(--radius-md)', 
-            padding: '16px',
-            backgroundColor: 'var(--color-surface-soft)'
+          <div className="no-scrollbar" style={{ 
+            maxHeight: '220px', 
+            overflowY: 'auto', 
+            overscrollBehavior: 'contain', 
+            padding: '0 4px',
+            borderTop: forecasts.length > 0 ? '1px solid var(--color-border)' : 'none',
+            borderBottom: forecasts.length > 0 ? '1px solid var(--color-border)' : 'none'
           }}>
-            <Clock size={24} color="var(--color-text-muted)" style={{ marginBottom: 12, opacity: 0.5 }} />
-            <span style={{ fontSize: 13, color: 'var(--color-text-muted)', fontWeight: 600 }}>
-              {"Cargando previsi\u00f3n..."}
-            </span>
+            {forecasts.length > 0 ? (
+              <>
+                {forecasts.map(row => <ForecastRow key={row.id} row={row} />)}
+                <div style={{ 
+                  fontSize: 11, 
+                  color: 'var(--color-text-muted)', 
+                  textAlign: 'center', 
+                  marginTop: 16, 
+                  marginBottom: 8,
+                  fontStyle: 'italic' 
+                }}>
+                  {"* Basado en patrones recientes. Orientativo."}
+                </div>
+              </>
+            ) : (
+              <div style={{ padding: '16px 0', fontSize: 13, color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+                {"No hay datos de previsi\u00f3n."}
+              </div>
+            )}
           </div>
         )}
       </div>
