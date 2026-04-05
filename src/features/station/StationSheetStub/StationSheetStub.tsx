@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { Cog, Zap, ArrowDownToLine, ChevronRight, Heart, CornerUpRight } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
@@ -6,6 +6,7 @@ import { mockStations } from '../../../data/mocks/stations';
 import { Button } from '../../../components/ui/Button/Button';
 import { Chip } from '../../../components/ui/Chip/Chip';
 
+// BeBe v0.2.15i - Broken station Estado entry hotfix
 // Custom lightweight SVG for "Person Walking"
 interface WalkIconProps { size?: number | string; color?: string; }
 const WalkIcon = ({ size = 14, color = 'currentColor' }: WalkIconProps) => (
@@ -106,7 +107,7 @@ export const StationSheetStub = () => {
                   </span>
                   <div style={{ fontSize: 13, color: 'var(--color-trust-red)', opacity: 0.9, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span>{alt!.mechanicalCount + alt!.electricCount} bicis</span>
-                    <span style={{ opacity: 0.5 }}>·</span>
+                    <span style={{ opacity: 0.5 }}>Â·</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><WalkIcon size={12} /> {alt!.distanceMinutes} min</span>
                   </div>
                 </div>
@@ -124,16 +125,16 @@ export const StationSheetStub = () => {
       )}
 
       {/* 3 METRICS + 1 ACTION TILE */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', opacity: isBroken ? 0.4 : 1, pointerEvents: isBroken ? 'none' : 'auto' }}>
-        <div style={{ textAlign: 'center', padding: '14px 4px', backgroundColor: 'var(--color-surface-soft)', borderRadius: 'var(--radius-md)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+        <div style={{ textAlign: 'center', padding: '14px 4px', backgroundColor: 'var(--color-surface-soft)', borderRadius: 'var(--radius-md)', opacity: isBroken ? 0.4 : 1, pointerEvents: isBroken ? 'none' : 'auto' }}>
           <Cog size={20} strokeWidth={2.5} style={{ margin: '0 auto 6px', color: 'var(--color-text-main)' }} />
           <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em' }}>{station.mechanicalCount}</div>
         </div>
-        <div style={{ textAlign: 'center', padding: '14px 4px', backgroundColor: 'var(--color-surface-soft)', borderRadius: 'var(--radius-md)' }}>
+        <div style={{ textAlign: 'center', padding: '14px 4px', backgroundColor: 'var(--color-surface-soft)', borderRadius: 'var(--radius-md)', opacity: isBroken ? 0.4 : 1, pointerEvents: isBroken ? 'none' : 'auto' }}>
           <Zap size={20} strokeWidth={2.5} style={{ margin: '0 auto 6px', color: '#3B82F6' }} />
           <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em' }}>{station.electricCount}</div>
         </div>
-        <div style={{ textAlign: 'center', padding: '14px 4px', backgroundColor: 'var(--color-surface-soft)', borderRadius: 'var(--radius-md)' }}>
+        <div style={{ textAlign: 'center', padding: '14px 4px', backgroundColor: 'var(--color-surface-soft)', borderRadius: 'var(--radius-md)', opacity: isBroken ? 0.4 : 1, pointerEvents: isBroken ? 'none' : 'auto' }}>
           <ArrowDownToLine size={20} strokeWidth={2.5} style={{ margin: '0 auto 6px', color: 'var(--color-text-main)' }} />
           <div style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.03em' }}>{station.dockCount}</div>
         </div>
@@ -163,3 +164,4 @@ export const StationSheetStub = () => {
     </motion.div>
   );
 };
+
