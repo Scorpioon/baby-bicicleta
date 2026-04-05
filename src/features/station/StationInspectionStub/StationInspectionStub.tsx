@@ -1,4 +1,4 @@
-﻿// BeBe v0.2.8 - Per-bike Trust UI Step 1 (Local Data)
+﻿// BeBe v0.2.11 - Bike List Scroll Hotfix
 import { motion } from 'framer-motion';
 import { ArrowLeft, Clock, Cog, Zap, ShieldCheck, ShieldAlert, Shield } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
@@ -26,10 +26,13 @@ const getLocalBikes = (stationId: string): LocalBikeStatus[] => {
     'st_1': [
       { id: 'B-102', type: 'MECHANICAL', trustLevel: 'HIGH', trustLabel: 'Excelente' },
       { id: 'B-992', type: 'MECHANICAL', trustLevel: 'MEDIUM', trustLabel: 'Revisar frenos' },
-      { id: 'E-401', type: 'ELECTRIC', battery: 88, trustLevel: 'HIGH', trustLabel: 'Excelente' }
+      { id: 'E-401', type: 'ELECTRIC', battery: 88, trustLevel: 'HIGH', trustLabel: 'Excelente' },
+      { id: 'E-402', type: 'ELECTRIC', battery: 100, trustLevel: 'HIGH', trustLabel: 'Excelente' },
+      { id: 'B-993', type: 'MECHANICAL', trustLevel: 'LOW', trustLabel: 'Sill\u00edn roto' },
+      { id: 'B-994', type: 'MECHANICAL', trustLevel: 'HIGH', trustLabel: 'Ok' }
     ],
     'st_2': [
-      { id: 'E-112', type: 'ELECTRIC', battery: 12, trustLevel: 'LOW', trustLabel: 'BaterÃ­a baja' }
+      { id: 'E-112', type: 'ELECTRIC', battery: 12, trustLevel: 'LOW', trustLabel: 'Bater\u00eda baja' }
     ],
     'st_3': [
       { id: 'B-001', type: 'MECHANICAL', trustLevel: 'HIGH', trustLabel: 'Ok' },
@@ -91,7 +94,7 @@ export const StationInspectionStub = () => {
 
   return (
     <motion.div 
-      id="station_inspection_v0_2_8" 
+      id="station_inspection_v0_2_11" 
       initial={{ opacity: 0, x: 10 }} 
       animate={{ opacity: 1, x: 0 }} 
       exit={{ opacity: 0, x: -10 }}
@@ -144,19 +147,26 @@ export const StationInspectionStub = () => {
         </p>
       </div>
 
-      {/* Per-bike Detail List */}
+      {/* Per-bike Detail List (Bounded Scroll Area) */}
       <div style={{ marginBottom: 24 }}>
         <h4 style={{ 
           fontSize: 11, 
           fontWeight: 800, 
           color: 'var(--color-text-muted)', 
           textTransform: 'uppercase', 
-          marginBottom: 4, 
+          marginBottom: 8, 
           paddingLeft: 2 
         }}>
-          Bicis en estaciÃ³n ({bikes.length})
+          {"Bicis en estaci\u00f3n"} ({bikes.length})
         </h4>
-        <div style={{ maxHeight: '240px', overflowY: 'auto', padding: '0 2px' }}>
+        <div style={{ 
+          maxHeight: '220px', 
+          overflowY: 'auto', 
+          overscrollBehavior: 'contain', 
+          padding: '0 4px',
+          borderTop: bikes.length > 0 ? '1px solid var(--color-border)' : 'none',
+          borderBottom: bikes.length > 0 ? '1px solid var(--color-border)' : 'none'
+        }}>
           {bikes.length > 0 ? (
             bikes.map(bike => <BikeRow key={bike.id} bike={bike} />)
           ) : (
