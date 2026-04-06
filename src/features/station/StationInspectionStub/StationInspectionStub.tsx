@@ -1,7 +1,7 @@
-﻿// BeBe v0.2.14 - Inspection Module v2 (Step 3: Forecast-lite)
+﻿// BeBe v0.2.16 - Broken Station Inspection (Step 2: Alternatives)
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Clock, Cog, Zap, ShieldCheck, ShieldAlert, Shield, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { ArrowLeft, Clock, Cog, Zap, ShieldCheck, ShieldAlert, Shield, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
 import { mockStations } from '../../../data/mocks/stations';
@@ -152,9 +152,16 @@ export const StationInspectionStub = () => {
 
   if (!station) return null;
 
+  const isBroken = station.status === 'BROKEN';
+
+  const formatId = (idStr: string | number) => String(idStr).padStart(4, '0');
+  const fallbackStations = station.fallbackStationIds 
+    ? station.fallbackStationIds.map(id => mockStations.find(s => s.id === id)).filter(Boolean) 
+    : [];
+
   return (
     <motion.div 
-      id="station_inspection_v0_2_14" 
+      id="station_inspection_v0_2_16" 
       initial={{ opacity: 0, x: 10 }} 
       animate={{ opacity: 1, x: 0 }} 
       exit={{ opacity: 0, x: -10 }}
@@ -215,96 +222,181 @@ export const StationInspectionStub = () => {
 
       {/* Shared Content Module v2 */}
       <div style={{ marginBottom: 24 }}>
-        {/* Toggle UI */}
-        <div style={{ 
-          display: 'flex', 
-          backgroundColor: 'var(--color-surface-soft)', 
-          borderRadius: 'var(--radius-md)', 
-          padding: 4, 
-          marginBottom: 12 
-        }}>
-          <button
-            onClick={() => setActiveTab('bikes')}
-            style={{ 
-              flex: 1, 
-              padding: '8px 0', 
-              border: 'none', 
-              borderRadius: 'var(--radius-sm)', 
-              backgroundColor: activeTab === 'bikes' ? 'var(--color-surface-base)' : 'transparent', 
-              color: activeTab === 'bikes' ? 'var(--color-text-main)' : 'var(--color-text-muted)', 
-              fontWeight: 700, 
-              fontSize: 13, 
-              cursor: 'pointer', 
-              boxShadow: activeTab === 'bikes' ? 'var(--shadow-card)' : 'none', 
-              transition: 'all 0.2s ease' 
-            }}
-          >
-            Bicis ahora
-          </button>
-          <button
-            onClick={() => setActiveTab('forecast')}
-            style={{ 
-              flex: 1, 
-              padding: '8px 0', 
-              border: 'none', 
-              borderRadius: 'var(--radius-sm)', 
-              backgroundColor: activeTab === 'forecast' ? 'var(--color-surface-base)' : 'transparent', 
-              color: activeTab === 'forecast' ? 'var(--color-text-main)' : 'var(--color-text-muted)', 
-              fontWeight: 700, 
-              fontSize: 13, 
-              cursor: 'pointer', 
-              boxShadow: activeTab === 'forecast' ? 'var(--shadow-card)' : 'none', 
-              transition: 'all 0.2s ease' 
-            }}
-          >
-            {"Previsi\u00f3n"}
-          </button>
-        </div>
+        {!isBroken ? (
+          <>
+            {/* Toggle UI for Healthy Stations */}
+            <div style={{ 
+              display: 'flex', 
+              backgroundColor: 'var(--color-surface-soft)', 
+              borderRadius: 'var(--radius-md)', 
+              padding: 4, 
+              marginBottom: 12 
+            }}>
+              <button
+                onClick={() => setActiveTab('bikes')}
+                style={{ 
+                  flex: 1, 
+                  padding: '8px 0', 
+                  border: 'none', 
+                  borderRadius: 'var(--radius-sm)', 
+                  backgroundColor: activeTab === 'bikes' ? 'var(--color-surface-base)' : 'transparent', 
+                  color: activeTab === 'bikes' ? 'var(--color-text-main)' : 'var(--color-text-muted)', 
+                  fontWeight: 700, 
+                  fontSize: 13, 
+                  cursor: 'pointer', 
+                  boxShadow: activeTab === 'bikes' ? 'var(--shadow-card)' : 'none', 
+                  transition: 'all 0.2s ease' 
+                }}
+              >
+                Bicis ahora
+              </button>
+              <button
+                onClick={() => setActiveTab('forecast')}
+                style={{ 
+                  flex: 1, 
+                  padding: '8px 0', 
+                  border: 'none', 
+                  borderRadius: 'var(--radius-sm)', 
+                  backgroundColor: activeTab === 'forecast' ? 'var(--color-surface-base)' : 'transparent', 
+                  color: activeTab === 'forecast' ? 'var(--color-text-main)' : 'var(--color-text-muted)', 
+                  fontWeight: 700, 
+                  fontSize: 13, 
+                  cursor: 'pointer', 
+                  boxShadow: activeTab === 'forecast' ? 'var(--shadow-card)' : 'none', 
+                  transition: 'all 0.2s ease' 
+                }}
+              >
+                {"Previsi\u00f3n"}
+              </button>
+            </div>
 
-        {/* Content Area */}
-        {activeTab === 'bikes' ? (
-          <div className="no-scrollbar" style={{ 
-            maxHeight: '220px', 
-            overflowY: 'auto', 
-            overscrollBehavior: 'contain', 
-            padding: '0 4px',
-            borderTop: bikes.length > 0 ? '1px solid var(--color-border)' : 'none',
-            borderBottom: bikes.length > 0 ? '1px solid var(--color-border)' : 'none'
-          }}>
-            {bikes.length > 0 ? (
-              bikes.map(bike => <BikeRow key={bike.id} bike={bike} />)
+            {/* Content Area for Healthy Stations */}
+            {activeTab === 'bikes' ? (
+              <div className="no-scrollbar" style={{ 
+                maxHeight: '220px', 
+                overflowY: 'auto', 
+                overscrollBehavior: 'contain', 
+                padding: '0 4px',
+                borderTop: bikes.length > 0 ? '1px solid var(--color-border)' : 'none',
+                borderBottom: bikes.length > 0 ? '1px solid var(--color-border)' : 'none'
+              }}>
+                {bikes.length > 0 ? (
+                  bikes.map(bike => <BikeRow key={bike.id} bike={bike} />)
+                ) : (
+                  <div style={{ padding: '16px 0', fontSize: 13, color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+                    No hay detalles de bicis disponibles.
+                  </div>
+                )}
+              </div>
             ) : (
-              <div style={{ padding: '16px 0', fontSize: 13, color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-                No hay detalles de bicis disponibles.
+              <div className="no-scrollbar" style={{ 
+                maxHeight: '220px', 
+                overflowY: 'auto', 
+                overscrollBehavior: 'contain', 
+                padding: '0 4px',
+                borderTop: forecasts.length > 0 ? '1px solid var(--color-border)' : 'none',
+                borderBottom: forecasts.length > 0 ? '1px solid var(--color-border)' : 'none'
+              }}>
+                {forecasts.length > 0 ? (
+                  <>
+                    {forecasts.map(row => <ForecastRow key={row.id} row={row} />)}
+                    <div style={{ 
+                      fontSize: 11, 
+                      color: 'var(--color-text-muted)', 
+                      textAlign: 'center', 
+                      marginTop: 16, 
+                      marginBottom: 8,
+                      fontStyle: 'italic' 
+                    }}>
+                      {"* Basado en patrones recientes. Orientativo."}
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ padding: '16px 0', fontSize: 13, color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
+                    {"No hay datos de previsi\u00f3n."}
+                  </div>
+                )}
               </div>
             )}
-          </div>
+          </>
         ) : (
-          <div className="no-scrollbar" style={{ 
-            maxHeight: '220px', 
-            overflowY: 'auto', 
-            overscrollBehavior: 'contain', 
-            padding: '0 4px',
-            borderTop: forecasts.length > 0 ? '1px solid var(--color-border)' : 'none',
-            borderBottom: forecasts.length > 0 ? '1px solid var(--color-border)' : 'none'
-          }}>
-            {forecasts.length > 0 ? (
-              <>
-                {forecasts.map(row => <ForecastRow key={row.id} row={row} />)}
-                <div style={{ 
-                  fontSize: 11, 
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            {/* Broken Station Context Block */}
+            <div style={{ 
+              padding: '24px 16px', 
+              borderRadius: 'var(--radius-md)', 
+              backgroundColor: 'var(--color-surface-soft)',
+              border: '1px solid var(--color-border)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center'
+            }}>
+              <AlertTriangle size={24} color="var(--color-trust-yellow)" style={{ marginBottom: 12 }} />
+              <h3 style={{ fontSize: 15, fontWeight: 800, marginBottom: 8 }}>
+                {"Estaci\u00f3n no disponible"}
+              </h3>
+              <p style={{ fontSize: 13, color: 'var(--color-text-muted)', lineHeight: 1.5, marginBottom: 4 }}>
+                {"Se ha detectado una incidencia t\u00e9cnica. Revisi\u00f3n o mantenimiento en curso."}
+              </p>
+              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)', opacity: 0.8 }}>
+                {"Sin hora confirmada de normalizaci\u00f3n"}
+              </span>
+            </div>
+
+            {/* Alternatives Sub-module */}
+            {fallbackStations.length > 0 && (
+              <div>
+                <h4 style={{ 
+                  fontSize: 12, 
+                  fontWeight: 800, 
                   color: 'var(--color-text-muted)', 
-                  textAlign: 'center', 
-                  marginTop: 16, 
-                  marginBottom: 8,
-                  fontStyle: 'italic' 
+                  marginBottom: 12, 
+                  textTransform: 'uppercase', 
+                  letterSpacing: '0.04em' 
                 }}>
-                  {"* Basado en patrones recientes. Orientativo."}
+                  Alternativas operativas cercanas
+                </h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {fallbackStations.map(alt => {
+                    if (!alt) return null;
+                    const totalBikes = alt.mechanicalCount + alt.electricCount;
+                    return (
+                      <div key={alt.id} style={{
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        padding: '12px 16px', 
+                        backgroundColor: 'var(--color-surface-soft)',
+                        borderRadius: 'var(--radius-md)', 
+                        border: '1px solid var(--color-border)'
+                      }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                          <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-main)' }}>
+                            #{formatId(alt.stationNumber)} - {alt.streetName}
+                          </span>
+                          <span style={{ fontSize: 12, color: 'var(--color-text-muted)', fontWeight: 500 }}>
+                            {alt.distanceMinutes} min andando
+                          </span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, justifyContent: 'flex-end' }}>
+                            <span style={{ 
+                              fontSize: 16, 
+                              fontWeight: 800, 
+                              color: totalBikes > 0 ? 'var(--color-primary)' : 'var(--color-text-muted)' 
+                            }}>
+                              {totalBikes}
+                            </span>
+                            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>
+                              bicis
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              </>
-            ) : (
-              <div style={{ padding: '16px 0', fontSize: 13, color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-                {"No hay datos de previsi\u00f3n."}
               </div>
             )}
           </div>
