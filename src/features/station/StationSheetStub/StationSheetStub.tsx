@@ -6,7 +6,7 @@ import { mockStations } from '../../../data/mocks/stations';
 import { Button } from '../../../components/ui/Button/Button';
 import { Chip } from '../../../components/ui/Chip/Chip';
 
-// BeBe v0.2.15i - Broken station Estado entry hotfix
+// BeBe v0.2.16a - Broken alternatives separator micro-hotfix
 // Custom lightweight SVG for "Person Walking"
 interface WalkIconProps { size?: number | string; color?: string; }
 const WalkIcon = ({ size = 14, color = 'currentColor' }: WalkIconProps) => (
@@ -107,7 +107,7 @@ export const StationSheetStub = () => {
                   </span>
                   <div style={{ fontSize: 13, color: 'var(--color-trust-red)', opacity: 0.9, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span>{alt!.mechanicalCount + alt!.electricCount} bicis</span>
-                    <span style={{ opacity: 0.5 }}>Â·</span>
+                    <span style={{ opacity: 0.5 }}>-</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><WalkIcon size={12} /> {alt!.distanceMinutes} min</span>
                   </div>
                 </div>
@@ -164,4 +164,5 @@ export const StationSheetStub = () => {
     </motion.div>
   );
 };
+
 
