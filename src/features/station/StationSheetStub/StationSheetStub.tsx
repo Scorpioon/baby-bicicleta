@@ -6,7 +6,7 @@ import { mockStations } from '../../../data/mocks/stations';
 import { Button } from '../../../components/ui/Button/Button';
 import { Chip } from '../../../components/ui/Chip/Chip';
 
-// BeBe v0.2.16a - Broken alternatives separator micro-hotfix
+// BeBe v0.2.17 - Broken station first-level de-saturation
 // Custom lightweight SVG for "Person Walking"
 interface WalkIconProps { size?: number | string; color?: string; }
 const WalkIcon = ({ size = 14, color = 'currentColor' }: WalkIconProps) => (
@@ -98,14 +98,14 @@ export const StationSheetStub = () => {
           <h4 style={{ fontSize: 12, fontWeight: 800, color: 'var(--color-trust-red)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Alternativas operativas
           </h4>
-          <div style={{ backgroundColor: '#FEF2F2', borderRadius: 'var(--radius-md)', border: '1px solid #FECACA', overflow: 'hidden' }}>
+          <div style={{ backgroundColor: 'var(--color-surface-soft)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
             {fallbackStations.map((alt, i) => (
-              <div key={alt!.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: i < fallbackStations.length - 1 ? '1px solid #FECACA' : 'none' }}>
+              <div key={alt!.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', borderBottom: i < fallbackStations.length - 1 ? '1px solid var(--color-border)' : 'none' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2, overflow: 'hidden' }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-trust-red)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: 12 }}>
+                  <span style={{ fontSize: 14, fontWeight: 700, color: 'var(--color-text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', paddingRight: 12 }}>
                     #{formatId(alt!.stationNumber)} - {alt!.streetName}
                   </span>
-                  <div style={{ fontSize: 13, color: 'var(--color-trust-red)', opacity: 0.9, display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ fontSize: 13, color: 'var(--color-text-muted)', opacity: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span>{alt!.mechanicalCount + alt!.electricCount} bicis</span>
                     <span style={{ opacity: 0.5 }}>-</span>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><WalkIcon size={12} /> {alt!.distanceMinutes} min</span>
@@ -114,7 +114,7 @@ export const StationSheetStub = () => {
                 {/* Native button bypasses any generic Button.tsx merge collisions */}
                 <button 
                   onClick={() => handleFallback(alt!.id)}
-                  style={{ backgroundColor: 'white', color: 'var(--color-trust-red)', border: '1px solid #FECACA', borderRadius: 'var(--radius-sm)', padding: '6px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
+                  style={{ backgroundColor: 'var(--color-surface-base)', color: 'var(--color-text-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '6px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
                 >
                   Ir
                 </button>
@@ -164,5 +164,6 @@ export const StationSheetStub = () => {
     </motion.div>
   );
 };
+
 
 
