@@ -6,7 +6,7 @@ import { mockStations } from '../../../data/mocks/stations';
 import { Button } from '../../../components/ui/Button/Button';
 import { Chip } from '../../../components/ui/Chip/Chip';
 
-// BeBe v0.2.17 - Broken station first-level de-saturation
+// BeBe v0.2.18 - Alternative station handoff micro-layer
 // Custom lightweight SVG for "Person Walking"
 interface WalkIconProps { size?: number | string; color?: string; }
 const WalkIcon = ({ size = 14, color = 'currentColor' }: WalkIconProps) => (
@@ -39,8 +39,10 @@ export const StationSheetStub = () => {
     }, 1500);
   };
 
-  const handleFallback = (id: string) => {
+  const handleFallback = (id?: string) => {
+    if (!id) return;
     selectStation(id);
+    setSheetState('SHEET_STATION_VIEW');
   };
 
   const isHealthy = station.confidenceState === 'HIGH';
@@ -153,7 +155,7 @@ export const StationSheetStub = () => {
       </div>
 
       {/* BOTTOM CTAS */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginTop: 16, opacity: isBroken ? 0.4 : 1, filter: isBroken ? 'grayscale(100%)' : 'none', pointerEvents: isBroken ? 'none' : 'auto' }}>
         <Button id="station_cta_reserve" fullWidth variant="secondary" onClick={handleReserve} disabled={isEmpty || isBroken}>
           Reservar bici
         </Button>
@@ -164,6 +166,8 @@ export const StationSheetStub = () => {
     </motion.div>
   );
 };
+
+
 
 
 

@@ -1,4 +1,4 @@
-﻿// BeBe v0.2.16 - Broken Station Inspection (Step 2: Alternatives)
+﻿// BeBe v0.2.18 - Alternative station handoff micro-layer
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Clock, Cog, Zap, ShieldCheck, ShieldAlert, Shield, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
@@ -142,7 +142,7 @@ const ForecastRow = ({ row }: { row: LocalForecastRow }) => {
 };
 
 export const StationInspectionStub = () => {
-  const { selectedStationId } = useCoreStore();
+  const { selectedStationId, selectStation } = useCoreStore();
   const setSheetState = useUIStore(s => s.setSheetState);
   const [activeTab, setActiveTab] = useState<'bikes' | 'forecast'>('bikes');
   
@@ -379,19 +379,23 @@ export const StationInspectionStub = () => {
                             {alt.distanceMinutes} min andando
                           </span>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, justifyContent: 'flex-end' }}>
-                            <span style={{ 
-                              fontSize: 16, 
-                              fontWeight: 800, 
-                              color: totalBikes > 0 ? 'var(--color-primary)' : 'var(--color-text-muted)' 
-                            }}>
-                              {totalBikes}
-                            </span>
-                            <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>
-                              bicis
-                            </span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, justifyContent: 'flex-end' }}>
+                              <span style={{ fontSize: 16, fontWeight: 800, color: totalBikes > 0 ? 'var(--color-primary)' : 'var(--color-text-muted)' }}>{totalBikes}</span>
+                              <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--color-text-muted)' }}>bicis</span>
+                            </div>
                           </div>
+                          <button 
+                            onClick={() => {
+                              if (!alt.id) return;
+                              selectStation(alt.id);
+                              setSheetState('SHEET_STATION_VIEW');
+                            }}
+                            style={{ backgroundColor: 'var(--color-surface-base)', color: 'var(--color-text-main)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', padding: '6px 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
+                          >
+                            Ir
+                          </button>
                         </div>
                       </div>
                     );
@@ -416,3 +420,4 @@ export const StationInspectionStub = () => {
     </motion.div>
   );
 };
+
