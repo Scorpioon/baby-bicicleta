@@ -1,3 +1,7 @@
+﻿// CCOS FILE VERSION: v0.2.19b
+// CCOS LAST PATCH: map_user_presence
+// CCOS CHANGE TYPE: FEATURE
+// CCOS FEATURE ID: BEBE_0219b_ID_1002
 import { useRef } from 'react';
 import Map, { Marker } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
@@ -10,7 +14,7 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
 
 export const MapView = () => {
   const mapRef = useRef<MapRef>(null);
-  const { selectedStationId, selectStation, clearSelection } = useCoreStore();
+  const { selectedStationId, selectStation, clearSelection, userLocation } = useCoreStore();
   const { sheetHeightPx, setSheetState } = useUIStore();
 
   const handleMarkerClick = (e: any, id: string) => {
@@ -40,6 +44,16 @@ export const MapView = () => {
       padding={{ bottom: sheetHeightPx }}
       onClick={handleMapClick}
     >
+            {/* User Location Marker */}
+      {userLocation && (
+        <Marker longitude={userLocation.lng} latitude={userLocation.lat}>
+          <div style={{
+            width: 16, height: 16, backgroundColor: '#3B82F6', borderRadius: '50%',
+            border: '3px solid white', boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.3), 0 2px 4px rgba(0,0,0,0.2)',
+            zIndex: 50
+          }} />
+        </Marker>
+      )}
       {mockStations.map(st => {
         const isSelected = st.id === selectedStationId;
         const isBroken = st.status === 'BROKEN';
@@ -64,3 +78,4 @@ export const MapView = () => {
     </Map>
   );
 };
+
