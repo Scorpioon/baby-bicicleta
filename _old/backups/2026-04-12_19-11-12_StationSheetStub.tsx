@@ -1,7 +1,7 @@
-// CCOS FILE VERSION: v0.2.19n
-// CCOS LAST PATCH: nav_cta_clarity
+// CCOS FILE VERSION: v0.2.19j
+// CCOS LAST PATCH: nav_semantics_step1
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0219n_ID_1002
+// CCOS FEATURE ID: BEBE_0219j_ID_1002
 import { motion } from 'framer-motion';
 import { Cog, Zap, ArrowDownToLine, ChevronRight, Heart, CornerUpRight } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
@@ -25,7 +25,7 @@ const WalkIcon = ({ size = 14, color = 'currentColor' }: WalkIconProps) => (
 );
 
 export const StationSheetStub = () => {
-  const { selectedStationId, selectStation, startReservation, setReservationStatus, setDestination, destinationStationId } = useCoreStore();
+  const { selectedStationId, selectStation, startReservation, setReservationStatus, setDestination } = useCoreStore();
   const setSheetState = useUIStore(s => s.setSheetState);
   
   const station = mockStations.find(s => s.id === selectedStationId);
@@ -81,8 +81,8 @@ export const StationSheetStub = () => {
           <button style={{ backgroundColor: 'transparent', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
             <Heart size={20} color={station.isFavorite ? 'var(--color-accent)' : 'var(--color-text-muted)'} fill={station.isFavorite ? 'var(--color-accent)' : 'none'} />
           </button>
-          <button onClick={() => setDestination(station.id, 'WALK')} style={{ backgroundColor: station.id === destinationStationId ? '#10B981' : 'var(--color-surface-soft)', border: station.id === destinationStationId ? '1px solid #10B981' : '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s ease' }}>
-            <CornerUpRight size={20} color={station.id === destinationStationId ? 'white' : 'var(--color-text-main)'} />
+          <button style={{ backgroundColor: 'var(--color-surface-soft)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-sm)', width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+            <CornerUpRight size={20} color="var(--color-text-main)" />
           </button>
         </div>
       </div>

@@ -1,7 +1,7 @@
-// CCOS FILE VERSION: v0.2.19n
-// CCOS LAST PATCH: nav_cta_clarity
+// CCOS FILE VERSION: v0.2.19m
+// CCOS LAST PATCH: nav_semantics_step2_map_feedback
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0219n_ID_1001
+// CCOS FEATURE ID: BEBE_0219m_ID_1001
 import { useRef, useEffect } from 'react';
 import Map, { Marker } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
@@ -91,7 +91,7 @@ export const MapView = () => {
             <div style={{
               width: 24, height: 24, backgroundColor: bgColor, borderRadius: '50%', 
               border: `2px solid ${borderColor}`, cursor: 'pointer',
-              boxShadow: isSelected ? '0 0 0 2px white, 0 0 0 5px var(--color-text-main)' : isDestination ? '0 0 0 2px white, 0 0 0 5px #10B981, 0 4px 12px rgba(16, 185, 129, 0.4)' : '0 2px 5px rgba(0,0,0,0.2)',
+              boxShadow: isSelected ? '0 0 0 2px white, 0 0 0 5px var(--color-text-main)' : isDestination ? '0 0 0 2px white, 0 0 0 5px #3B82F6, 0 4px 12px rgba(59, 130, 246, 0.4)' : '0 2px 5px rgba(0,0,0,0.2)',
               transition: 'all 0.2s cubic-bezier(0.2, 0, 0, 1)',
               transform: (isSelected || isDestination) ? 'scale(1.15)' : 'scale(1)',
               display: 'flex', alignItems: 'center', justifyContent: 'center'

@@ -1,8 +1,8 @@
-// CCOS FILE VERSION: v0.2.19n
-// CCOS LAST PATCH: nav_cta_clarity
+﻿// CCOS FILE VERSION: v0.2.19b
+// CCOS LAST PATCH: map_user_presence
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0219n_ID_1001
-import { useRef, useEffect } from 'react';
+// CCOS FEATURE ID: BEBE_0219b_ID_1002
+import { useRef } from 'react';
 import Map, { Marker } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { AlertTriangle } from 'lucide-react';
@@ -14,33 +14,8 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
 
 export const MapView = () => {
   const mapRef = useRef<MapRef>(null);
-  const { selectedStationId, selectStation, clearSelection, userLocation, destinationStationId } = useCoreStore();
-    const { sheetHeightPx, setSheetState } = useUIStore();
-
-  useEffect(() => {
-    if (destinationStationId && userLocation && mapRef.current) {
-      const destSt = mockStations.find(s => s.id === destinationStationId);
-      if (destSt) {
-        const map = mapRef.current.getMap();
-        const bounds = map.getBounds();
-        const destPt: [number, number] = [destSt.lng, destSt.lat];
-        const usrPt: [number, number] = [userLocation.lng, userLocation.lat];
-
-        // Safe bounds check - only frame if points are outside current view
-        if (!bounds.contains(destPt) || !bounds.contains(usrPt)) {
-          const minLng = Math.min(userLocation.lng, destSt.lng);
-          const maxLng = Math.max(userLocation.lng, destSt.lng);
-          const minLat = Math.min(userLocation.lat, destSt.lat);
-          const maxLat = Math.max(userLocation.lat, destSt.lat);
-
-          mapRef.current.fitBounds(
-            [[minLng, minLat], [maxLng, maxLat]],
-            { padding: { top: 60, bottom: sheetHeightPx + 60, left: 60, right: 60 }, duration: 800 }
-          );
-        }
-      }
-    }
-  }, [destinationStationId, userLocation, sheetHeightPx]);
+  const { selectedStationId, selectStation, clearSelection, userLocation } = useCoreStore();
+  const { sheetHeightPx, setSheetState } = useUIStore();
 
   const handleMarkerClick = (e: any, id: string) => {
     e.originalEvent.stopPropagation();
@@ -80,8 +55,7 @@ export const MapView = () => {
         </Marker>
       )}
       {mockStations.map(st => {
-                const isSelected = st.id === selectedStationId;
-        const isDestination = st.id === destinationStationId;
+        const isSelected = st.id === selectedStationId;
         const isBroken = st.status === 'BROKEN';
         const bgColor = getMarkerBgColor(st);
         const borderColor = isBroken ? '#E11D48' : 'white';
@@ -91,9 +65,9 @@ export const MapView = () => {
             <div style={{
               width: 24, height: 24, backgroundColor: bgColor, borderRadius: '50%', 
               border: `2px solid ${borderColor}`, cursor: 'pointer',
-              boxShadow: isSelected ? '0 0 0 2px white, 0 0 0 5px var(--color-text-main)' : isDestination ? '0 0 0 2px white, 0 0 0 5px #10B981, 0 4px 12px rgba(16, 185, 129, 0.4)' : '0 2px 5px rgba(0,0,0,0.2)',
+              boxShadow: isSelected ? '0 0 0 2px white, 0 0 0 5px var(--color-text-main)' : '0 2px 5px rgba(0,0,0,0.2)',
               transition: 'all 0.2s cubic-bezier(0.2, 0, 0, 1)',
-              transform: (isSelected || isDestination) ? 'scale(1.15)' : 'scale(1)',
+              transform: isSelected ? 'scale(1.15)' : 'scale(1)',
               display: 'flex', alignItems: 'center', justifyContent: 'center'
             }}>
               {isBroken && <AlertTriangle size={14} color="#BE123C" strokeWidth={3} />}
