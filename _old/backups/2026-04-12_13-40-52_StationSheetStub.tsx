@@ -1,7 +1,7 @@
-// CCOS FILE VERSION: v0.2.19j
-// CCOS LAST PATCH: nav_semantics_step1
+﻿// CCOS FILE VERSION: v0.2.19d
+// CCOS LAST PATCH: map_destination_framing
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0219j_ID_1002
+// CCOS FEATURE ID: BEBE_0219d_ID_1003
 import { motion } from 'framer-motion';
 import { Cog, Zap, ArrowDownToLine, ChevronRight, Heart, CornerUpRight } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
@@ -45,7 +45,7 @@ export const StationSheetStub = () => {
 
   const handleFallback = (id?: string) => {
     if (!id) return;
-    setDestination(id, 'WALK');
+    setDestination(id);
     selectStation(id);
     setSheetState('SHEET_STATION_VIEW');
   };
@@ -171,6 +171,7 @@ export const StationSheetStub = () => {
     </motion.div>
   );
 };
+
 
 
 

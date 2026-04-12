@@ -1,8 +1,4 @@
-// CCOS FILE VERSION: v0.2.19j
-// CCOS LAST PATCH: nav_semantics_step1
-// CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0219j_ID_1002
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import { Cog, Zap, ArrowDownToLine, ChevronRight, Heart, CornerUpRight } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
@@ -25,7 +21,7 @@ const WalkIcon = ({ size = 14, color = 'currentColor' }: WalkIconProps) => (
 );
 
 export const StationSheetStub = () => {
-  const { selectedStationId, selectStation, startReservation, setReservationStatus, setDestination } = useCoreStore();
+  const { selectedStationId, selectStation, startReservation, setReservationStatus } = useCoreStore();
   const setSheetState = useUIStore(s => s.setSheetState);
   
   const station = mockStations.find(s => s.id === selectedStationId);
@@ -45,7 +41,6 @@ export const StationSheetStub = () => {
 
   const handleFallback = (id?: string) => {
     if (!id) return;
-    setDestination(id, 'WALK');
     selectStation(id);
     setSheetState('SHEET_STATION_VIEW');
   };

@@ -1,8 +1,4 @@
-// CCOS FILE VERSION: v0.2.19j
-// CCOS LAST PATCH: nav_semantics_step1
-// CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0219j_ID_1002
-// BeBe v0.2.18 - Alternative station handoff micro-layer
+﻿// BeBe v0.2.18 - Alternative station handoff micro-layer
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Clock, Cog, Zap, ShieldCheck, ShieldAlert, Shield, TrendingUp, TrendingDown, Minus, AlertTriangle } from 'lucide-react';
@@ -146,7 +142,7 @@ const ForecastRow = ({ row }: { row: LocalForecastRow }) => {
 };
 
 export const StationInspectionStub = () => {
-  const { selectedStationId, selectStation, setDestination } = useCoreStore();
+  const { selectedStationId, selectStation } = useCoreStore();
   const setSheetState = useUIStore(s => s.setSheetState);
   const [activeTab, setActiveTab] = useState<'bikes' | 'forecast'>('bikes');
   
@@ -393,7 +389,6 @@ export const StationInspectionStub = () => {
                           <button 
                             onClick={() => {
                               if (!alt.id) return;
-                              setDestination(alt.id, 'WALK');
                               selectStation(alt.id);
                               setSheetState('SHEET_STATION_VIEW');
                             }}

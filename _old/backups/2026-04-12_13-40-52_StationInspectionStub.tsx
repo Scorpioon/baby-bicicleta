@@ -1,7 +1,7 @@
-// CCOS FILE VERSION: v0.2.19j
-// CCOS LAST PATCH: nav_semantics_step1
+﻿// CCOS FILE VERSION: v0.2.19d
+// CCOS LAST PATCH: map_destination_framing
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0219j_ID_1002
+// CCOS FEATURE ID: BEBE_0219d_ID_1003
 // BeBe v0.2.18 - Alternative station handoff micro-layer
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -393,7 +393,7 @@ export const StationInspectionStub = () => {
                           <button 
                             onClick={() => {
                               if (!alt.id) return;
-                              setDestination(alt.id, 'WALK');
+                              setDestination(alt.id);
                               selectStation(alt.id);
                               setSheetState('SHEET_STATION_VIEW');
                             }}
@@ -425,4 +425,5 @@ export const StationInspectionStub = () => {
     </motion.div>
   );
 };
+
 
