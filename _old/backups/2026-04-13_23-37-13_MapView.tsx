@@ -1,9 +1,9 @@
-// CCOS FILE VERSION: v0.2.20c
-// CCOS LAST PATCH: visual_walking_path
+// CCOS FILE VERSION: v0.2.19n
+// CCOS LAST PATCH: nav_cta_clarity
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0220c_ID_1001
+// CCOS FEATURE ID: BEBE_0219n_ID_1001
 import { useRef, useEffect } from 'react';
-import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre';
+import Map, { Marker } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { AlertTriangle } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
@@ -15,19 +15,6 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
 export const MapView = () => {
   const mapRef = useRef<MapRef>(null);
   const { selectedStationId, selectStation, clearSelection, userLocation, destinationStationId } = useCoreStore();
-
-  const destStation = destinationStationId ? mockStations.find(s => s.id === destinationStationId) : null;
-  const pathData: any = (userLocation && destStation) ? {
-    type: 'Feature',
-    properties: {},
-    geometry: {
-      type: 'LineString',
-      coordinates: [
-        [userLocation.lng, userLocation.lat],
-        [destStation.lng, destStation.lat]
-      ]
-    }
-  } : null;
     const { sheetHeightPx, setSheetState } = useUIStore();
 
   useEffect(() => {
@@ -91,21 +78,6 @@ export const MapView = () => {
             zIndex: 50
           }} />
         </Marker>
-      )}
-            {/* Visual Desire Line (Walking intent) */}
-      {pathData && (
-        <Source id="walking-path-source" type="geojson" data={pathData}>
-          <Layer
-            id="walking-path-layer"
-            type="line"
-            paint={{
-              'line-color': '#10B981',
-              'line-width': 4,
-              'line-dasharray': [2, 2],
-              'line-opacity': 0.5
-            }}
-          />
-        </Source>
       )}
       {mockStations.map(st => {
                 const isSelected = st.id === selectedStationId;
