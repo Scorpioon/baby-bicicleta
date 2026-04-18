@@ -1,7 +1,7 @@
-// CCOS FILE VERSION: v0.2.21b
-// CCOS LAST PATCH: reservation_walk_handshake
+// CCOS FILE VERSION: v0.2.19n
+// CCOS LAST PATCH: nav_cta_clarity
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0221b_ID_1001
+// CCOS FEATURE ID: BEBE_0219n_ID_1002
 import { motion } from 'framer-motion';
 import { Cog, Zap, ArrowDownToLine, ChevronRight, Heart, CornerUpRight } from 'lucide-react';
 import { useCoreStore } from '../../../store/useCoreStore';
@@ -37,7 +37,6 @@ export const StationSheetStub = () => {
     setTimeout(() => {
       if (Math.random() > 0.3) {
         setReservationStatus('SUCCESS', Date.now() + 10 * 60 * 1000);
-        setDestination(station.id, 'WALK');
       } else {
         setReservationStatus('FAILED');
       }

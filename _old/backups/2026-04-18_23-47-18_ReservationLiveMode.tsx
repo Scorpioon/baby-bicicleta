@@ -1,7 +1,3 @@
-// CCOS FILE VERSION: v0.2.21b
-// CCOS LAST PATCH: reservation_walk_handshake
-// CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0221b_ID_1002
 // BeBe v0.2.3 Pickup Minimum UI
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,7 +9,7 @@ import { Button } from '../../../components/ui/Button/Button';
 type RailState = 'collapsed' | 'semi-pulled';
 
 export const ReservationLiveMode = () => {
-  const { reservation, setReservationStatus, cancelReservation, destinationStationId, clearDestination } = useCoreStore();
+  const { reservation, setReservationStatus, cancelReservation } = useCoreStore();
   const setSheetState = useUIStore(s => s.setSheetState);
   
   const [railState, setRailState] = useState<RailState>('collapsed');
@@ -32,9 +28,6 @@ export const ReservationLiveMode = () => {
   }, [reservation.status, reservation.expiresAt, setReservationStatus]);
 
   const handleCancel = () => {
-    if (destinationStationId === station.id) {
-      clearDestination();
-    }
     cancelReservation();
     setSheetState('SHEET_STATION_VIEW');
   };
