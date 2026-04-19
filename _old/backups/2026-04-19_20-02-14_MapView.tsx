@@ -1,7 +1,7 @@
-// CCOS FILE VERSION: v0.2.24a
-// CCOS LAST PATCH: walk_local_street_graph
+// CCOS FILE VERSION: v0.2.23a
+// CCOS LAST PATCH: walk_route_refinement
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0224a_ID_1001
+// CCOS FEATURE ID: BEBE_0223a_ID_1001
 import { useRef, useEffect, useState } from 'react';
 import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
@@ -10,75 +10,40 @@ import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
 import { mockStations } from '../../../data/mocks/stations';
 
-// Tiny local street-graph shell for route realism MVP
-const MOCK_GRAPH: Record<string, { lat: number, lng: number, edges: string[] }> = {
-  'n_cat': { lat: 41.3870, lng: 2.1700, edges: ['n_gracia', 'n_laietana', 'n_triomf'] },
-  'n_gracia': { lat: 41.3930, lng: 2.1640, edges: ['n_cat', 'n_diag'] },
-  'n_triomf': { lat: 41.3915, lng: 2.1805, edges: ['n_cat', 'n_marina', 'n_laietana'] },
-  'n_marina': { lat: 41.3965, lng: 2.1865, edges: ['n_triomf', 'n_sagrada'] },
-  'n_sagrada': { lat: 41.4036, lng: 2.1744, edges: ['n_marina', 'n_diag'] },
-  'n_barceloneta': { lat: 41.3784, lng: 2.1925, edges: ['n_laietana'] },
-  'n_laietana': { lat: 41.3810, lng: 2.1760, edges: ['n_cat', 'n_triomf', 'n_barceloneta'] },
-  'n_diag': { lat: 41.3980, lng: 2.1700, edges: ['n_gracia', 'n_sagrada'] }
-};
-
-const getClosestNode = (lng: number, lat: number): string | null => {
-  let closest: string | null = null;
-  let minDist = Infinity;
-  for (const [id, node] of Object.entries(MOCK_GRAPH)) {
-    const d = Math.pow(node.lng - lng, 2) + Math.pow(node.lat - lat, 2);
-    if (d < minDist) { minDist = d; closest = id; }
-  }
-  return closest;
-};
-
-// Street-aware deterministic routing with fallback
-const generateStreetRoute = (startLng: number, startLat: number, endLng: number, endLat: number): number[][] => {
+// Refined deterministic geometry for urban walking shell
+const generateUrbanRoute = (startLng: number, startLat: number, endLng: number, endLat: number): number[][] => {
   const dLng = endLng - startLng;
   const dLat = endLat - startLat;
-  const directDist = Math.sqrt(dLng * dLng + dLat * dLat);
+  const dist = Math.sqrt(dLng * dLng + dLat * dLat);
 
-  // 1. Direct path for very short distances
-  if (directDist < 0.003) {
+  // 1. Direct path for short distances
+  if (dist < 0.002) {
     return [[startLng, startLat], [endLng, endLat]];
   }
 
-  // 2. Try graph resolution via BFS
-  const startNode = getClosestNode(startLng, startLat);
-  const endNode = getClosestNode(endLng, endLat);
-
-  if (startNode && endNode && startNode !== endNode) {
-    const queue: { id: string, path: string[] }[] = [{ id: startNode, path: [startNode] }];
-    const visited = new Set<string>([startNode]);
-    let foundPath: string[] | null = null;
-
-    while (queue.length > 0) {
-      const curr = queue.shift()!;
-      if (curr.id === endNode) {
-        foundPath = curr.path;
-        break;
-      }
-      for (const edge of MOCK_GRAPH[curr.id].edges) {
-        if (!visited.has(edge)) {
-          visited.add(edge);
-          queue.push({ id: edge, path: [...curr.path, edge] });
-        }
-      }
-    }
-
-    if (foundPath) {
-      return [
-        [startLng, startLat], // Origin connector
-        ...foundPath.map(id => [MOCK_GRAPH[id].lng, MOCK_GRAPH[id].lat]), // Street graph path
-        [endLng, endLat] // Destination connector
-      ];
-    }
+  // 2. Medium distance: 3-point soft dogleg
+  if (dist < 0.006) {
+    const midLng = startLng + dLng * 0.7;
+    const midLat = startLat + dLat * 0.3;
+    return [[startLng, startLat], [midLng, midLat], [endLng, endLat]];
   }
 
-  // 3. Fallback: 3-point soft dogleg if graph is disconnected or missing
-  const midLng = startLng + dLng * 0.7;
-  const midLat = startLat + dLat * 0.3;
-  return [[startLng, startLat], [midLng, midLat], [endLng, endLat]];
+  // 3. Longer distances: 4-point staggered Z-shape
+  if (Math.abs(dLng) > Math.abs(dLat)) {
+    return [
+      [startLng, startLat],
+      [startLng + dLng * 0.4, startLat],
+      [startLng + dLng * 0.6, endLat],
+      [endLng, endLat]
+    ];
+  } else {
+    return [
+      [startLng, startLat],
+      [startLng, startLat + dLat * 0.4],
+      [endLng, startLat + dLat * 0.6],
+      [endLng, endLat]
+    ];
+  }
 };
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
@@ -95,7 +60,7 @@ export const MapView = () => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: generateStreetRoute(userLocation.lng, userLocation.lat, destStation.lng, destStation.lat)
+      coordinates: generateUrbanRoute(userLocation.lng, userLocation.lat, destStation.lng, destStation.lat)
     }
   } : null;
     const { sheetHeightPx, setSheetState } = useUIStore();
