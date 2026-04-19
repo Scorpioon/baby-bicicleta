@@ -22,17 +22,5 @@ export const mockStations = [
     distanceMinutes: 4, mechanicalCount: 0, electricCount: 0, dockCount: 0,
     confidenceState: 'LOW', confidenceLabel: 'INOPERATIVA', confidenceCopy: 'Estación fuera de servicio temporalmente.',
     dataFreshnessLabel: 'hace 12 min', issueHint: 'Mantenimiento programado.', isFavorite: false, status: 'BROKEN', fallbackStationIds: ['st_1', 'st_2']
-  },
-  {
-    id: 'st_5', name: 'Sagrada FamÃ­lia', stationNumber: '344', streetName: 'Carrer de Mallorca', lat: 41.4036, lng: 2.1744, 
-    distanceMinutes: 12, mechanicalCount: 5, electricCount: 8, dockCount: 4,
-    confidenceState: 'HIGH', confidenceLabel: 'FIABLE', confidenceCopy: 'Buena disponibilidad de bicis y anclajes.',
-    dataFreshnessLabel: 'hace 3 min', issueHint: null, isFavorite: true, status: 'OPERATIONAL', fallbackStationIds: []
-  },
-  {
-    id: 'st_6', name: 'Barceloneta', stationNumber: '10', streetName: 'Passeig MarÃ­tim', lat: 41.3784, lng: 2.1925, 
-    distanceMinutes: 18, mechanicalCount: 1, electricCount: 2, dockCount: 20,
-    confidenceState: 'MEDIUM', confidenceLabel: 'PRECAUCIÃ“N', confidenceCopy: 'Alta rotaciÃ³n. Bicis casi agotadas.',
-    dataFreshnessLabel: 'hace 1 min', issueHint: null, isFavorite: false, status: 'OPERATIONAL', fallbackStationIds: []
   }
 ];

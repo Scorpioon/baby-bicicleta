@@ -1,8 +1,8 @@
-// CCOS FILE VERSION: v0.2.22b
-// CCOS LAST PATCH: dev_route_testing_harness
+// CCOS FILE VERSION: v0.2.22a
+// CCOS LAST PATCH: walk_route_realism
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0222b_ID_1002
-import { useRef, useEffect, useState } from 'react';
+// CCOS FEATURE ID: BEBE_0222a_ID_1001
+import { useRef, useEffect } from 'react';
 import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
 import { AlertTriangle } from 'lucide-react';
@@ -31,9 +31,7 @@ const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json
 
 export const MapView = () => {
   const mapRef = useRef<MapRef>(null);
-  const { selectedStationId, selectStation, clearSelection, userLocation, destinationStationId, setUserLocation } = useCoreStore();
-  const [isDraggingUser, setIsDraggingUser] = useState(false);
-  const isDev = import.meta.env.DEV;
+  const { selectedStationId, selectStation, clearSelection, userLocation, destinationStationId } = useCoreStore();
 
   const destStation = destinationStationId ? mockStations.find(s => s.id === destinationStationId) : null;
   const pathData: any = (userLocation && destStation) ? {
@@ -100,27 +98,11 @@ export const MapView = () => {
     >
             {/* User Location Marker */}
       {userLocation && (
-        <Marker 
-          longitude={userLocation.lng} 
-          latitude={userLocation.lat}
-          draggable={isDev}
-          onDragStart={() => setIsDraggingUser(true)}
-          onDragEnd={(e: any) => {
-            setIsDraggingUser(false);
-            setUserLocation({ lng: e.lngLat.lng, lat: e.lngLat.lat });
-          }}
-        >
+        <Marker longitude={userLocation.lng} latitude={userLocation.lat}>
           <div style={{
-            width: 16, height: 16, 
-            backgroundColor: isDraggingUser ? '#F59E0B' : '#3B82F6', 
-            borderRadius: '50%',
-            border: '3px solid white', 
-            boxShadow: isDraggingUser 
-              ? '0 0 0 4px rgba(245, 158, 11, 0.3), 0 4px 8px rgba(0,0,0,0.2)' 
-              : '0 0 0 2px rgba(59, 130, 246, 0.3), 0 2px 4px rgba(0,0,0,0.2)',
-            zIndex: 50,
-            cursor: isDev ? (isDraggingUser ? 'grabbing' : 'grab') : 'default',
-            transition: 'background-color 0.2s ease, box-shadow 0.2s ease'
+            width: 16, height: 16, backgroundColor: '#3B82F6', borderRadius: '50%',
+            border: '3px solid white', boxShadow: '0 0 0 2px rgba(59, 130, 246, 0.3), 0 2px 4px rgba(0,0,0,0.2)',
+            zIndex: 50
           }} />
         </Marker>
       )}
