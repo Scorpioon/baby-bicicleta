@@ -1,7 +1,7 @@
-// CCOS FILE VERSION: v0.2.23a
-// CCOS LAST PATCH: walk_route_refinement
+// CCOS FILE VERSION: v0.2.22b
+// CCOS LAST PATCH: dev_route_testing_harness
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0223a_ID_1001
+// CCOS FEATURE ID: BEBE_0222b_ID_1002
 import { useRef, useEffect, useState } from 'react';
 import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
@@ -10,40 +10,21 @@ import { useCoreStore } from '../../../store/useCoreStore';
 import { useUIStore } from '../../../store/useUIStore';
 import { mockStations } from '../../../data/mocks/stations';
 
-// Refined deterministic geometry for urban walking shell
-const generateUrbanRoute = (startLng: number, startLat: number, endLng: number, endLat: number): number[][] => {
-  const dLng = endLng - startLng;
-  const dLat = endLat - startLat;
-  const dist = Math.sqrt(dLng * dLng + dLat * dLat);
+// Minimal deterministic geometry to simulate urban blocks (Manhattan distance)
+const generateManhattanRoute = (startLng: number, startLat: number, endLng: number, endLat: number): number[][] => {
+  // If points are extremely close, just use a straight line
+  const dist = Math.sqrt(Math.pow(endLng - startLng, 2) + Math.pow(endLat - startLat, 2));
+  if (dist < 0.002) return [[startLng, startLat], [endLng, endLat]];
 
-  // 1. Direct path for short distances
-  if (dist < 0.002) {
-    return [[startLng, startLat], [endLng, endLat]];
-  }
+  // Generate an L-shape based on dominant direction
+  const midLng = Math.abs(endLng - startLng) > Math.abs(endLat - startLat) ? endLng : startLng;
+  const midLat = Math.abs(endLng - startLng) > Math.abs(endLat - startLat) ? startLat : endLat;
 
-  // 2. Medium distance: 3-point soft dogleg
-  if (dist < 0.006) {
-    const midLng = startLng + dLng * 0.7;
-    const midLat = startLat + dLat * 0.3;
-    return [[startLng, startLat], [midLng, midLat], [endLng, endLat]];
-  }
-
-  // 3. Longer distances: 4-point staggered Z-shape
-  if (Math.abs(dLng) > Math.abs(dLat)) {
-    return [
-      [startLng, startLat],
-      [startLng + dLng * 0.4, startLat],
-      [startLng + dLng * 0.6, endLat],
-      [endLng, endLat]
-    ];
-  } else {
-    return [
-      [startLng, startLat],
-      [startLng, startLat + dLat * 0.4],
-      [endLng, startLat + dLat * 0.6],
-      [endLng, endLat]
-    ];
-  }
+  return [
+    [startLng, startLat],
+    [midLng, midLat],
+    [endLng, endLat]
+  ];
 };
 
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
@@ -60,7 +41,7 @@ export const MapView = () => {
     properties: {},
     geometry: {
       type: 'LineString',
-      coordinates: generateUrbanRoute(userLocation.lng, userLocation.lat, destStation.lng, destStation.lat)
+      coordinates: generateManhattanRoute(userLocation.lng, userLocation.lat, destStation.lng, destStation.lat)
     }
   } : null;
     const { sheetHeightPx, setSheetState } = useUIStore();
