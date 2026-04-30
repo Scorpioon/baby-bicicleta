@@ -1,7 +1,7 @@
-// CCOS FILE VERSION: v0.2.24b
-// CCOS LAST PATCH: walk_plausibility_pass
+// CCOS FILE VERSION: v0.2.24a
+// CCOS LAST PATCH: walk_local_street_graph
 // CCOS CHANGE TYPE: FEATURE
-// CCOS FEATURE ID: BEBE_0224b_ID_1001
+// CCOS FEATURE ID: BEBE_0224a_ID_1001
 import { useRef, useEffect, useState } from 'react';
 import Map, { Marker, Source, Layer } from 'react-map-gl/maplibre';
 import type { MapRef } from 'react-map-gl/maplibre';
@@ -12,25 +12,14 @@ import { mockStations } from '../../../data/mocks/stations';
 
 // Tiny local street-graph shell for route realism MVP
 const MOCK_GRAPH: Record<string, { lat: number, lng: number, edges: string[] }> = {
-  'n_cat': { lat: 41.3870, lng: 2.1700, edges: ['n_gracia', 'n_laietana', 'n_urquinaona', 'n_universitat'] },
-  'n_universitat': { lat: 41.3851, lng: 2.1637, edges: ['n_cat', 'n_urgell'] },
-  'n_urgell': { lat: 41.3820, lng: 2.1580, edges: ['n_universitat'] },
-  'n_urquinaona': { lat: 41.3889, lng: 2.1730, edges: ['n_cat', 'n_triomf', 'n_tetuan'] },
-  'n_tetuan': { lat: 41.3945, lng: 2.1755, edges: ['n_urquinaona', 'n_monumental'] },
+  'n_cat': { lat: 41.3870, lng: 2.1700, edges: ['n_gracia', 'n_laietana', 'n_triomf'] },
   'n_gracia': { lat: 41.3930, lng: 2.1640, edges: ['n_cat', 'n_diag'] },
-  'n_triomf': { lat: 41.3915, lng: 2.1805, edges: ['n_urquinaona', 'n_marina', 'n_laietana'] },
-  'n_marina': { lat: 41.3965, lng: 2.1865, edges: ['n_triomf', 'n_glories'] },
-  'n_glories': { lat: 41.4035, lng: 2.1895, edges: ['n_marina', 'n_monumental', 'n_poblenou'] },
-  'n_poblenou': { lat: 41.3995, lng: 2.2000, edges: ['n_glories'] },
+  'n_triomf': { lat: 41.3915, lng: 2.1805, edges: ['n_cat', 'n_marina', 'n_laietana'] },
+  'n_marina': { lat: 41.3965, lng: 2.1865, edges: ['n_triomf', 'n_sagrada'] },
+  'n_sagrada': { lat: 41.4036, lng: 2.1744, edges: ['n_marina', 'n_diag'] },
+  'n_barceloneta': { lat: 41.3784, lng: 2.1925, edges: ['n_laietana'] },
   'n_laietana': { lat: 41.3810, lng: 2.1760, edges: ['n_cat', 'n_triomf', 'n_barceloneta'] },
-  'n_diag': { lat: 41.3980, lng: 2.1700, edges: ['n_gracia', 'n_sagrada'] },
-  'n_monumental': { lat: 41.4000, lng: 2.1810, edges: ['n_tetuan', 'n_glories', 'n_sagrada'] },
-  'n_sagrada': { lat: 41.4036, lng: 2.1744, edges: ['n_monumental'] },
-  'n_barceloneta': { lat: 41.3784, lng: 2.1925, edges: ['n_laietana'] }
-};
-
-const getManhattanConnector = (p1: number[], p2: number[]): number[][] => {
-  return [p1, [p1[0], p2[1]], p2];
+  'n_diag': { lat: 41.3980, lng: 2.1700, edges: ['n_gracia', 'n_sagrada'] }
 };
 
 const getClosestNode = (lng: number, lat: number): string | null => {
@@ -49,8 +38,8 @@ const generateStreetRoute = (startLng: number, startLat: number, endLng: number,
   const dLat = endLat - startLat;
   const directDist = Math.sqrt(dLng * dLng + dLat * dLat);
 
-  // 1. Direct path for ultra-short distances
-  if (directDist < 0.0015) {
+  // 1. Direct path for very short distances
+  if (directDist < 0.003) {
     return [[startLng, startLat], [endLng, endLat]];
   }
 
@@ -58,11 +47,7 @@ const generateStreetRoute = (startLng: number, startLat: number, endLng: number,
   const startNode = getClosestNode(startLng, startLat);
   const endNode = getClosestNode(endLng, endLat);
 
-  if (startNode && endNode) {
-    if (startNode === endNode) {
-      return getManhattanConnector([startLng, startLat], [endLng, endLat]);
-    }
-
+  if (startNode && endNode && startNode !== endNode) {
     const queue: { id: string, path: string[] }[] = [{ id: startNode, path: [startNode] }];
     const visited = new Set<string>([startNode]);
     let foundPath: string[] | null = null;
@@ -82,26 +67,20 @@ const generateStreetRoute = (startLng: number, startLat: number, endLng: number,
     }
 
     if (foundPath) {
-      const graphCoords = foundPath.map(id => [MOCK_GRAPH[id].lng, MOCK_GRAPH[id].lat]);
-      const startPt = graphCoords[0];
-      const endPt = graphCoords[graphCoords.length - 1];
-
-      const startDist = Math.sqrt(Math.pow(startLng - startPt[0], 2) + Math.pow(startLat - startPt[1], 2));
-      const endDist = Math.sqrt(Math.pow(endLng - endPt[0], 2) + Math.pow(endLat - endPt[1], 2));
-
-      const startConn = startDist > 0.0008 ? getManhattanConnector([startLng, startLat], startPt) : [[startLng, startLat], startPt];
-      const endConn = endDist > 0.0008 ? getManhattanConnector(endPt, [endLng, endLat]) : [endPt, [endLng, endLat]];
-
-      startConn.pop(); // avoid duplicating graph start node
-      endConn.shift(); // avoid duplicating graph end node
-
-      return [...startConn, ...graphCoords, ...endConn];
+      return [
+        [startLng, startLat], // Origin connector
+        ...foundPath.map(id => [MOCK_GRAPH[id].lng, MOCK_GRAPH[id].lat]), // Street graph path
+        [endLng, endLat] // Destination connector
+      ];
     }
   }
 
-  // 3. Fallback: Manhattan dogleg
-  return getManhattanConnector([startLng, startLat], [endLng, endLat]);
+  // 3. Fallback: 3-point soft dogleg if graph is disconnected or missing
+  const midLng = startLng + dLng * 0.7;
+  const midLat = startLat + dLat * 0.3;
+  return [[startLng, startLat], [midLng, midLat], [endLng, endLat]];
 };
+
 const MAP_STYLE = 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json';
 
 export const MapView = () => {
